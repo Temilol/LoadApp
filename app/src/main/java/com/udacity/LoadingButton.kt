@@ -36,8 +36,8 @@ class LoadingButton @JvmOverloads constructor(
         color = context.getColor(R.color.colorAccent)
     }
 
-    private val animator = ObjectAnimator.ofFloat(0F, 360F).apply {
-        duration = 1800
+    private val objectAnimator = ObjectAnimator.ofFloat(0F, 360F).apply {
+        duration = 1000
         repeatCount = ObjectAnimator.INFINITE
         repeatMode = ObjectAnimator.RESTART
         interpolator = LinearInterpolator()
@@ -53,7 +53,7 @@ class LoadingButton @JvmOverloads constructor(
             ButtonState.Loading -> {
                 isEnabled = false
                 updateButtonLabel(R.string.button_loading)
-                animator.start()
+                objectAnimator.start()
             }
             ButtonState.Clicked -> {
                 isEnabled = true
@@ -62,7 +62,7 @@ class LoadingButton @JvmOverloads constructor(
                 isEnabled = true
                 updateButtonLabel(R.string.button_name)
                 setBackgroundColor(context.getColor(R.color.colorPrimary))
-                animator.cancel()
+                objectAnimator.cancel()
             }
         }
         invalidate()
