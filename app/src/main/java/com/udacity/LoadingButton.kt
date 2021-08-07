@@ -2,6 +2,7 @@ package com.udacity
 
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
@@ -21,6 +22,9 @@ class LoadingButton @JvmOverloads constructor(
     private var value = 0F
     private var buttonLabelRes: Int = R.string.button_name
     private val rectF = RectF()
+    private var buttonAnimationColor = 0
+    private var textColor = 0
+    private var circleColor = 0
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -32,8 +36,9 @@ class LoadingButton @JvmOverloads constructor(
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
+        textAlign = Paint.Align.CENTER
+        textSize = 60.0f
         strokeWidth = strokeWidth
-        color = context.getColor(R.color.colorAccent)
     }
 
     private val objectAnimator = ObjectAnimator.ofFloat(0F, 360F).apply {
@@ -70,7 +75,32 @@ class LoadingButton @JvmOverloads constructor(
 
 
     init {
+        setPropertiesWithAttr(context.obtainStyledAttributes(attrs, R.styleable.LoadingButton))
         setBackgroundColor(context.getColor(R.color.colorPrimary))
+    }
+
+    private fun setPropertiesWithAttr(typedArray: TypedArray) {
+        typedArray.apply {
+            try {
+                getColor(
+                    R.styleable.LoadingButton_circleColor,
+                    context.getColor(R.color.colorAccent)
+                ).let {
+                    circleColor = it
+                }
+                getColor(
+                    R.styleable.LoadingButton_buttonAnimationColor,
+                    context.getColor(R.color.darkGreen)
+                ).let {
+                    buttonAnimationColor = it
+                }
+                getColor(R.styleable.LoadingButton_textColor, context.getColor(R.color.white)).let {
+                    textColor = it
+                }
+            } finally {
+                recycle()
+            }
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -78,7 +108,7 @@ class LoadingButton @JvmOverloads constructor(
         // Background
         if (buttonState != ButtonState.Completed) {
             // Background color animation
-            paint.color = context.getColor(R.color.darkGreen)
+            paint.color = buttonAnimationColor
             canvas?.drawRect(
                 0F,
                 0F,
@@ -88,7 +118,7 @@ class LoadingButton @JvmOverloads constructor(
             )
 
             //Circle Animation
-            paint.color = context.getColor(R.color.colorAccent)
+            paint.color = circleColor
             rectF.set(
                 widthSize - 200F,
                 (heightSize / 2) - 40F,
@@ -109,9 +139,10 @@ class LoadingButton @JvmOverloads constructor(
 
         // Text
         val x = widthSize.toFloat() / 2
-        val y = (heightSize / 2 - (textPaint.descent() + textPaint.ascent()) / 2)
+        val y = (heightSize / 2 - (paint.descent() + paint.ascent()) / 2)
         val buttonLabel = context.getString(buttonLabelRes)
-        canvas?.drawText(buttonLabel, x, y, textPaint)
+        paint.color = textColor
+        canvas?.drawText(buttonLabel, x, y, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
